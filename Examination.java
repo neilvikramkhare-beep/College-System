@@ -1,4 +1,4 @@
-package CollegeAdministrationSystem;
+package com.college;
 public class Examination {
     String name;
     int roll;

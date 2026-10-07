@@ -1,8 +1,19 @@
-package CollegeAdministrationSystem;
+package com.college;
+import jakarta.persistence.*;
+
+@Entity
 public class Course {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String courseName;
     private String courseCode;
     private int credits;
+    
+    public Course() {
+    }
+
     public Course(String courseName, String courseCode, int credits) {
         this.courseName = courseName;
         this.courseCode = courseCode;

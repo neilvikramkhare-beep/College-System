@@ -1,0 +1,15 @@
+com\college\CollegeERP.class
+com\college\CollegeWebApplication.class
+com\college\Course.class
+com\college\Faculty.class
+com\college\Examination.class
+com\college\Student.class
+com\college\CollegeController.class
+com\college\Reviews.class
+com\college\Syllabus.class
+com\college\Admission.class
+com\college\Timetable.class
+com\college\Attendance.class
+com\college\CollegeDatabase.class
+com\college\College.class
+com\college\CollegeDatabaseThread.class

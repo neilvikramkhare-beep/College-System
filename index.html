@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Administration Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { brand: { dark: '#0f172a', primary: '#1e3a8a', secondary: '#3b82f6', light: '#e0f2fe' } } } } }
+    </script>
+    <style>
+        .section-view { display: none; }
+        .section-view.active { display: block; }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+    </style>
+</head>
+<body class="bg-gray-100 flex h-screen overflow-hidden font-sans">
+    <aside class="w-64 bg-brand-dark text-white flex flex-col shadow-xl z-20 overflow-y-auto">
+        <div class="flex items-center justify-center h-20 border-b border-gray-700 shrink-0">
+            <i class="fas fa-university text-3xl text-brand-secondary mr-3"></i>
+            <h1 class="text-xl font-bold uppercase tracking-wider">EduManage</h1>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center px-4 py-3 hover:bg-gray-800 rounded-lg text-left transition-colors">
+                <i class="fas fa-chart-pie w-6"></i> Dashboard
+            </button>
+            <button onclick="navigate('colleges')" id="nav-colleges" class="nav-btn w-full flex items-center px-4 py-3 hover:bg-gray-800 rounded-lg text-left transition-colors">
+                <i class="fas fa-building w-6"></i> Colleges
+            </button>
+            <button onclick="navigate('students')" id="nav-students" class="nav-btn w-full flex items-center px-4 py-3 hover:bg-gray-800 rounded-lg text-left transition-colors">
+                <i class="fas fa-user-graduate w-6"></i> Students
+            </button>
+            <button onclick="navigate('courses')" id="nav-courses" class="nav-btn w-full flex items-center px-4 py-3 hover:bg-gray-800 rounded-lg text-left transition-colors">
+                <i class="fas fa-book-open w-6"></i> Courses
+            </button>
+            <button onclick="navigate('faculty')" id="nav-faculty" class="nav-btn w-full flex items-center px-4 py-3 hover:bg-gray-800 rounded-lg text-left transition-colors">
+                <i class="fas fa-chalkboard-teacher w-6"></i> Faculty
+            </button>
+            <button onclick="navigate('admissions')" id="nav-admissions" class="nav-btn w-full flex items-center px-4 py-3 hover:bg-gray-800 rounded-lg text-left transition-colors">
+                <i class="fas fa-file-signature w-6"></i> Admissions
+            </button>
+            <button onclick="navigate('attendances')" id="nav-attendances" class="nav-btn w-full flex items-center px-4 py-3 hover:bg-gray-800 rounded-lg text-left transition-colors">
+                <i class="fas fa-calendar-check w-6"></i> Attendances
+            </button>
+            <button onclick="navigate('examinations')" id="nav-examinations" class="nav-btn w-full flex items-center px-4 py-3 hover:bg-gray-800 rounded-lg text-left transition-colors">
+                <i class="fas fa-file-alt w-6"></i> Examinations
+            </button>
+            <button onclick="navigate('reviews')" id="nav-reviews" class="nav-btn w-full flex items-center px-4 py-3 hover:bg-gray-800 rounded-lg text-left transition-colors">
+                <i class="fas fa-star w-6"></i> Reviews
+            </button>
+            <button onclick="navigate('syllabuses')" id="nav-syllabuses" class="nav-btn w-full flex items-center px-4 py-3 hover:bg-gray-800 rounded-lg text-left transition-colors">
+                <i class="fas fa-book w-6"></i> Syllabuses
+            </button>
+            <button onclick="navigate('timetables')" id="nav-timetables" class="nav-btn w-full flex items-center px-4 py-3 hover:bg-gray-800 rounded-lg text-left transition-colors">
+                <i class="fas fa-clock w-6"></i> Timetables
+            </button>
+        </nav>
+    </aside>
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="h-20 bg-white shadow-sm flex items-center justify-between px-8 z-10 shrink-0">
+            <h2 id="page-title" class="text-2xl font-semibold text-gray-800">Overview Dashboard</h2>
+            <div class="flex items-center space-x-4">
+                <div id="connection-status" class="text-sm font-bold text-gray-500">Checking connection...</div>
+                <button onclick="refreshData()" class="p-2 text-gray-400 hover:text-brand-secondary transition-colors" title="Refresh Data">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </header>
+        <div class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-8">
+            <div id="error-banner" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+                <p class="font-bold">Backend Connection Failed</p>
+                <p>Could not connect to the Java backend.</p>
+            </div>
+            
+            <div id="dashboard" class="section-view active space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium">Database Status</p>
+                            <p id="db-status" class="text-2xl font-bold text-green-500">Online</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">College Operations Dashboard</h3>
+                    <div class="flex flex-wrap gap-4">
+                        <button onclick="runOp('addDepartment')" class="bg-indigo-500 text-white px-4 py-2 rounded shadow">Add Department (test)</button>
+                        <button onclick="runOp('addFaculty')" class="bg-indigo-500 text-white px-4 py-2 rounded shadow">Add Faculty (test)</button>
+                        <button onclick="runOp('addStudent')" class="bg-indigo-500 text-white px-4 py-2 rounded shadow">Add Student (test)</button>
+                        <button onclick="runOp('addCourse')" class="bg-indigo-500 text-white px-4 py-2 rounded shadow">Add Course (test)</button>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-4 italic">Check the Java console to see the output from these operations!</p>
+                </div>
+            </div>
+
+            <!-- COLLEGE SECTION -->
+            <div id="colleges" class="section-view">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">College Directory</h3>
+                    <button onclick="openModal('colleges-modal')" class="bg-brand-secondary hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm transition-colors font-medium flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Add College
+                    </button>
+                </div>
+                <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Established</th>
+                            </tr>
+                        </thead>
+                        <tbody id="colleges-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- STUDENT SECTION -->
+            <div id="students" class="section-view">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">Student Directory</h3>
+                    <button onclick="openModal('students-modal')" class="bg-brand-secondary hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm transition-colors font-medium flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Add Student
+                    </button>
+                </div>
+                <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enrolled Courses</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- COURSE SECTION -->
+            <div id="courses" class="section-view">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">Course Directory</h3>
+                    <button onclick="openModal('courses-modal')" class="bg-brand-secondary hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm transition-colors font-medium flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Add Course
+                    </button>
+                </div>
+                <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course Name</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course Code</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Credits</th>
+                            </tr>
+                        </thead>
+                        <tbody id="courses-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- FACULTY SECTION -->
+            <div id="faculty" class="section-view">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">Faculty Directory</h3>
+                    <button onclick="openModal('faculty-modal')" class="bg-brand-secondary hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm transition-colors font-medium flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Add Faculty
+                    </button>
+                </div>
+                <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Designation</th>
+                            </tr>
+                        </thead>
+                        <tbody id="faculty-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ADMISSION SECTION -->
+            <div id="admissions" class="section-view">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">Admission Directory</h3>
+                    <button onclick="openModal('admissions-modal')" class="bg-brand-secondary hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm transition-colors font-medium flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Add Admission
+                    </button>
+                </div>
+                <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll No</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admissions-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ATTENDANCE SECTION -->
+            <div id="attendances" class="section-view">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">Attendance Directory</h3>
+                    <button onclick="openModal('attendances-modal')" class="bg-brand-secondary hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm transition-colors font-medium flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Add Attendance
+                    </button>
+                </div>
+                <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendance %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendances-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- EXAMINATION SECTION -->
+            <div id="examinations" class="section-view">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">Examination Directory</h3>
+                    <button onclick="openModal('examinations-modal')" class="bg-brand-secondary hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm transition-colors font-medium flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Add Examination
+                    </button>
+                </div>
+                <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subjects</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marks</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exam Name</th>
+                            </tr>
+                        </thead>
+                        <tbody id="examinations-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- REVIEW SECTION -->
+            <div id="reviews" class="section-view">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">Review Directory</h3>
+                    <button onclick="openModal('reviews-modal')" class="bg-brand-secondary hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm transition-colors font-medium flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Add Review
+                    </button>
+                </div>
+                <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Review</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reviews-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SYLLABUS SECTION -->
+            <div id="syllabuses" class="section-view">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">Syllabus Directory</h3>
+                    <button onclick="openModal('syllabuses-modal')" class="bg-brand-secondary hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm transition-colors font-medium flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Add Syllabus
+                    </button>
+                </div>
+                <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subjects</th>
+                            </tr>
+                        </thead>
+                        <tbody id="syllabuses-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TIMETABLE SECTION -->
+            <div id="timetables" class="section-view">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">Timetable Directory</h3>
+                    <button onclick="openModal('timetables-modal')" class="bg-brand-secondary hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm transition-colors font-medium flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Add Timetable
+                    </button>
+                </div>
+                <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course Name</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course ID</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Faculty</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Day</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timetables-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- College Modal -->
+    <div id="colleges-modal" class="modal fixed inset-0 z-50 bg-gray-900 bg-opacity-50 items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">Add College</h3>
+                <button onclick="closeModal('colleges-modal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form id="colleges-form" onsubmit="submitForm(event, 'colleges')" class="p-6 space-y-4">
+                <div id="colleges-form-error" class="hidden text-red-500 text-sm font-bold"></div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">name</label>
+                    <input type="text" id="colleges-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">location</label>
+                    <input type="text" id="colleges-location" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">establishedYear</label>
+                    <input type="number" id="colleges-establishedYear" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('colleges-modal')" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-brand-secondary rounded-lg">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Modal -->
+    <div id="students-modal" class="modal fixed inset-0 z-50 bg-gray-900 bg-opacity-50 items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">Add Student</h3>
+                <button onclick="closeModal('students-modal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form id="students-form" onsubmit="submitForm(event, 'students')" class="p-6 space-y-4">
+                <div id="students-form-error" class="hidden text-red-500 text-sm font-bold"></div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">name</label>
+                    <input type="text" id="students-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">age</label>
+                    <input type="number" id="students-age" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">enrolledCourses</label>
+                    <input type="text" id="students-enrolledCourses" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('students-modal')" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-brand-secondary rounded-lg">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Course Modal -->
+    <div id="courses-modal" class="modal fixed inset-0 z-50 bg-gray-900 bg-opacity-50 items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">Add Course</h3>
+                <button onclick="closeModal('courses-modal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form id="courses-form" onsubmit="submitForm(event, 'courses')" class="p-6 space-y-4">
+                <div id="courses-form-error" class="hidden text-red-500 text-sm font-bold"></div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">courseName</label>
+                    <input type="text" id="courses-courseName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">courseCode</label>
+                    <input type="text" id="courses-courseCode" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">credits</label>
+                    <input type="number" id="courses-credits" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('courses-modal')" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-brand-secondary rounded-lg">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Faculty Modal -->
+    <div id="faculty-modal" class="modal fixed inset-0 z-50 bg-gray-900 bg-opacity-50 items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">Add Faculty</h3>
+                <button onclick="closeModal('faculty-modal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form id="faculty-form" onsubmit="submitForm(event, 'faculty')" class="p-6 space-y-4">
+                <div id="faculty-form-error" class="hidden text-red-500 text-sm font-bold"></div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">name</label>
+                    <input type="text" id="faculty-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">age</label>
+                    <input type="number" id="faculty-age" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">department</label>
+                    <input type="text" id="faculty-department" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">designation</label>
+                    <input type="text" id="faculty-designation" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('faculty-modal')" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-brand-secondary rounded-lg">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admission Modal -->
+    <div id="admissions-modal" class="modal fixed inset-0 z-50 bg-gray-900 bg-opacity-50 items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">Add Admission</h3>
+                <button onclick="closeModal('admissions-modal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form id="admissions-form" onsubmit="submitForm(event, 'admissions')" class="p-6 space-y-4">
+                <div id="admissions-form-error" class="hidden text-red-500 text-sm font-bold"></div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">name</label>
+                    <input type="text" id="admissions-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">age</label>
+                    <input type="number" id="admissions-age" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">rollNo</label>
+                    <input type="number" id="admissions-rollNo" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">semester</label>
+                    <input type="number" id="admissions-semester" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('admissions-modal')" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-brand-secondary rounded-lg">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Attendance Modal -->
+    <div id="attendances-modal" class="modal fixed inset-0 z-50 bg-gray-900 bg-opacity-50 items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">Add Attendance</h3>
+                <button onclick="closeModal('attendances-modal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form id="attendances-form" onsubmit="submitForm(event, 'attendances')" class="p-6 space-y-4">
+                <div id="attendances-form-error" class="hidden text-red-500 text-sm font-bold"></div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">roll</label>
+                    <input type="number" id="attendances-roll" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">name</label>
+                    <input type="text" id="attendances-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">year</label>
+                    <input type="number" id="attendances-year" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">attendance</label>
+                    <input type="number" id="attendances-attendance" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('attendances-modal')" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-brand-secondary rounded-lg">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Examination Modal -->
+    <div id="examinations-modal" class="modal fixed inset-0 z-50 bg-gray-900 bg-opacity-50 items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">Add Examination</h3>
+                <button onclick="closeModal('examinations-modal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form id="examinations-form" onsubmit="submitForm(event, 'examinations')" class="p-6 space-y-4">
+                <div id="examinations-form-error" class="hidden text-red-500 text-sm font-bold"></div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">name</label>
+                    <input type="text" id="examinations-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">roll</label>
+                    <input type="number" id="examinations-roll" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">subjects</label>
+                    <input type="text" id="examinations-subjects" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">marks</label>
+                    <input type="text" id="examinations-marks" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">examName</label>
+                    <input type="text" id="examinations-examName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('examinations-modal')" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-brand-secondary rounded-lg">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div id="reviews-modal" class="modal fixed inset-0 z-50 bg-gray-900 bg-opacity-50 items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">Add Review</h3>
+                <button onclick="closeModal('reviews-modal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form id="reviews-form" onsubmit="submitForm(event, 'reviews')" class="p-6 space-y-4">
+                <div id="reviews-form-error" class="hidden text-red-500 text-sm font-bold"></div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">name</label>
+                    <input type="text" id="reviews-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">year</label>
+                    <input type="number" id="reviews-year" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">reviewString</label>
+                    <input type="text" id="reviews-reviewString" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('reviews-modal')" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-brand-secondary rounded-lg">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Syllabus Modal -->
+    <div id="syllabuses-modal" class="modal fixed inset-0 z-50 bg-gray-900 bg-opacity-50 items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">Add Syllabus</h3>
+                <button onclick="closeModal('syllabuses-modal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form id="syllabuses-form" onsubmit="submitForm(event, 'syllabuses')" class="p-6 space-y-4">
+                <div id="syllabuses-form-error" class="hidden text-red-500 text-sm font-bold"></div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">subjects</label>
+                    <input type="text" id="syllabuses-subjects" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('syllabuses-modal')" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-brand-secondary rounded-lg">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Timetable Modal -->
+    <div id="timetables-modal" class="modal fixed inset-0 z-50 bg-gray-900 bg-opacity-50 items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">Add Timetable</h3>
+                <button onclick="closeModal('timetables-modal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form id="timetables-form" onsubmit="submitForm(event, 'timetables')" class="p-6 space-y-4">
+                <div id="timetables-form-error" class="hidden text-red-500 text-sm font-bold"></div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">courseName</label>
+                    <input type="text" id="timetables-courseName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">courseId</label>
+                    <input type="number" id="timetables-courseId" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">facultyName</label>
+                    <input type="text" id="timetables-facultyName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">day</label>
+                    <input type="text" id="timetables-day" required class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none">
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('timetables-modal')" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-brand-secondary rounded-lg">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:8080' : '';
+        let state = {};
+        
+        const config = {
+            'colleges': { endpoint: '/api/colleges', fields: ['name', 'location', 'establishedYear'], headers: ['name', 'location', 'establishedYear'] },
+            'students': { endpoint: '/api/students', fields: ['name', 'age', 'enrolledCourses'], headers: ['name', 'age', 'enrolledCourses'] },
+            'courses': { endpoint: '/api/courses', fields: ['courseName', 'courseCode', 'credits'], headers: ['courseName', 'courseCode', 'credits'] },
+            'faculty': { endpoint: '/api/faculties', fields: ['name', 'age', 'department', 'designation'], headers: ['name', 'age', 'department', 'designation'] },
+            'admissions': { endpoint: '/api/admissions', fields: ['name', 'age', 'rollNo', 'semester'], headers: ['name', 'age', 'rollNo', 'semester'] },
+            'attendances': { endpoint: '/api/attendances', fields: ['roll', 'name', 'year', 'attendance'], headers: ['roll', 'name', 'year', 'attendance'] },
+            'examinations': { endpoint: '/api/examinations', fields: ['name', 'roll', 'subjects', 'marks', 'examName'], headers: ['name', 'roll', 'subjects', 'marks', 'examName'] },
+            'reviews': { endpoint: '/api/reviews', fields: ['name', 'year', 'reviewString'], headers: ['name', 'year', 'reviewString'] },
+            'syllabuses': { endpoint: '/api/syllabuses', fields: ['subjects'], headers: ['subjects'] },
+            'timetables': { endpoint: '/api/timetables', fields: ['courseName', 'courseId', 'facultyName', 'day'], headers: ['courseName', 'courseId', 'facultyName', 'day'] },
+
+        };
+
+        function navigate(viewId) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-brand-primary'));
+            document.getElementById('nav-' + viewId).classList.add('bg-brand-primary');
+            document.querySelectorAll('.section-view').forEach(s => s.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { 
+            document.getElementById(id).classList.remove('active'); 
+        }
+
+        async function refreshData() {
+            try {
+                for (let key in config) {
+                    const res = await fetch(`${API_BASE}${config[key].endpoint}`);
+                    if (res.ok) {
+                        state[key] = await res.json();
+                        renderTable(key);
+                    }
+                }
+                document.getElementById('db-status').innerText = 'Online';
+                document.getElementById('connection-status').innerText = 'Connected';
+            } catch (e) {
+                document.getElementById('error-banner').classList.remove('hidden');
+                document.getElementById('db-status').innerText = 'Offline';
+            }
+        }
+        
+        async function runOp(op) {
+            const val = prompt(`Enter value for ${op}:`);
+            if(!val) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/colleges/operation`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ operation: op, value: val })
+                });
+                const txt = await res.text();
+                alert(txt);
+            } catch (err) { alert(err.message); }
+        }
+
+        function renderTable(key) {
+            const tbody = document.getElementById(key + '-table-body');
+            tbody.innerHTML = '';
+            const items = state[key] || [];
+            items.forEach(item => {
+                let row = '<tr class="hover:bg-gray-50">';
+                config[key].headers.forEach(h => {
+                    let val = item[h];
+                    if (Array.isArray(val)) val = val.join(', ');
+                    row += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${val}</td>`;
+                });
+                row += '</tr>';
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        async function submitForm(e, key) {
+            e.preventDefault();
+            const payload = {};
+            config[key].fields.forEach(f => {
+                const el = document.getElementById(`${key}-${f}`);
+                if (el.type === 'number') payload[f] = parseFloat(el.value);
+                else if (key === 'examinations' && (f === 'subjects' || f === 'marks')) {
+                    payload[f] = el.value.split(',').map(s => s.trim());
+                    if (f === 'marks') payload[f] = payload[f].map(n => parseInt(n));
+                }
+                else if (key === 'syllabuses' && f === 'subjects') {
+                    payload[f] = el.value.split(',').map(s => s.trim());
+                }
+                else payload[f] = el.value;
+            });
+
+            try {
+                const res = await fetch(`${API_BASE}${config[key].endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    const saved = await res.json();
+                    if (!state[key]) state[key] = [];
+                    state[key].push(saved);
+                    renderTable(key);
+                    closeModal(`${key}-modal`);
+                    e.target.reset();
+                }
+            } catch (err) { alert(err.message); }
+        }
+
+        document.addEventListener('DOMContentLoaded', refreshData);
+    </script>
+</body>
+</html>

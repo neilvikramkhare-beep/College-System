@@ -1,0 +1,86 @@
+Attached Element Context from Integrated Browser
+
+Element: div.container
+
+URL: file:///c%3A/Users/Admin/Desktop/CAS/index.html
+
+HTML Path: div.container
+
+Outer HTML:
+```html
+<div class="container">
+        <h1>College Administration ERP</h1>
+        <div class="nav">
+            <button id="btn-home" class="" onclick="showSection('home')">Home</button>
+            <button id="btn-students" onclick="showSection('students'); loadStudents();" class="active">View Students</button>
+            <button id="btn-courses" onclick="showSection('courses'); loadCourses();" class="">View Courses</button>
+        </div>
+        
+        <div id="home" class="content-section">
+            <div class="card">
+                <h2>Welcome to the Web Portal</h2>
+                <p>This system has been upgraded from a desktop GUI to a fully Java-based web application using Spring Boot. This modern single-page application connects to the REST API.</p>
+            </div>
+        </div>
+
+        <div id="students" class="content-section active">
+            <h2>Enrolled Students</h2>
+            <table>
+                <thead>
+                    <tr><th>Name</th><th>Age</th><th>Enrolled Courses</th></tr>
+                </thead>
+                <tbody id="students-body">
+                    <!-- Data will be populated here by JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="courses" class="content-section">
+            <h2>Active Courses</h2>
+            <table class="courses-table">
+                <thead>
+                    <tr><th>Course Name</th><th>Code</th><th>Credits</th></tr>
+                </thead>
+                <tbody id="courses-body">
+                    <!-- Data will be populated here by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+```
+
+Dimensions:
+- top: 40px
+- left: 40px
+- width: 922px
+- height: 371px
+
+CSS:
+```css
+.container { max-width: 900px; margin: auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+
+/* Inherited */
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333 }
+
+/* Resolved values */
+margin: 0px;
+padding: 40px;
+border-radius: 12px;
+background-attachment: scroll;
+background-clip: border-box;
+background-color: rgb(255, 255, 255);
+background-image: none;
+background-origin: padding-box;
+background-position-x: 0%;
+background-position-y: 0%;
+background-repeat: repeat;
+background-size: auto;
+box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 25px 0px;
+color: rgb(51, 51, 51);
+display: block;
+font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+height: 290.797px;
+max-width: 900px;
+unicode-bidi: isolate /*UA*/;
+width: 842px;
+```

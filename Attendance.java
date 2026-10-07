@@ -1,4 +1,6 @@
-package CollegeAdministrationSystem;
+package com.college;
+
+
 public class Attendance {
     int roll;
     String name;
