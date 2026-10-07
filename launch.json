@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "BlackTiger: read-only Windows audit",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/BlackTiger/enterprise_audit/run_audit.ps1",
+      "args": [
+        "-OutputDirectory",
+        "${workspaceFolder}/BlackTiger/enterprise_audit/reports"
+      ],
+      "cwd": "${workspaceFolder}/BlackTiger/enterprise_audit"
+    },
+    {
+      "name": "BlackTiger: local lab readiness",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/BlackTiger/lab_ops/check_lab.ps1",
+      "cwd": "${workspaceFolder}/BlackTiger/lab_ops"
+    }
+  ]
+}
