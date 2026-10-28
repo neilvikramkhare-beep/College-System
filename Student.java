@@ -20,6 +20,16 @@ public class Student {
         this.age = age;
         this.enrolledCourses = enrolledCourses;
     }
+
+    public Student(Long id, String name, int age, String enrolledCourses) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.enrolledCourses = enrolledCourses;
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

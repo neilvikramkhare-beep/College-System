@@ -24,6 +24,18 @@ public class Faculty {
         this.id = id;
     }
 
+    public Faculty(Long dbId, String name, int age, String department, String designation, int id) {
+        this.dbId = dbId;
+        this.name = name;
+        this.age = age;
+        this.department = department;
+        this.designation = designation;
+        this.id = id;
+    }
+
+    public Long getDbId() { return dbId; }
+    public void setDbId(Long dbId) { this.dbId = dbId; }
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 

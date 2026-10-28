@@ -19,6 +19,16 @@ public class Course {
         this.courseCode = courseCode;
         this.credits = credits;
     }
+
+    public Course(Long id, String courseName, String courseCode, int credits) {
+        this.id = id;
+        this.courseName = courseName;
+        this.courseCode = courseCode;
+        this.credits = credits;
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public String getCourseName() {
         return courseName;
     }
